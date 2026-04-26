@@ -25,9 +25,9 @@ let currentCategory = 'all';
 
 // Traducciones
 const translations = {
-    es: { nav_home: "Inicio", nav_products: "Productos", nav_cart: "Carrito", nav_admin: "Admin", login: "Iniciar Sesión", logout: "Cerrar Sesión", welcome_title: "BIENVENIDO A GAMING COMPUTER", welcome_subtitle: "Los mejores accesorios informáticos y componentes gaming en Bolivia", products_title: "Nuestros Productos", cart_title: "Tu Carrito", checkout_btn: "Finalizar Pedido", admin_title: "Panel de Administración", admin_products: "Productos", admin_categories: "Categorías", admin_users: "Usuarios", admin_orders: "Pedidos", empty_cart: "Tu carrito está vacío", total: "Total", currency: "Bs" },
-    en: { nav_home: "Home", nav_products: "Products", nav_cart: "Cart", nav_admin: "Admin", login: "Login", logout: "Logout", welcome_title: "WELCOME TO GAMING COMPUTER", welcome_subtitle: "The best computer accessories in Bolivia", products_title: "Our Products", cart_title: "Your Cart", checkout_btn: "Checkout", admin_title: "Admin Panel", admin_products: "Products", admin_categories: "Categories", admin_users: "Users", admin_orders: "Orders", empty_cart: "Your cart is empty", total: "Total", currency: "Bs" },
-    qu: { nav_home: "Wasiman", nav_products: "Imakuna", nav_cart: "Rantina", nav_admin: "Kamachiq", login: "Yaykuy", logout: "Lluqsichiy", welcome_title: "GAMING COMPUTERMAN SUTIYAYKUY", welcome_subtitle: "Allin informática imakuna Boliviapi", products_title: "Imakuna", cart_title: "Rantina", checkout_btn: "Rantiy", admin_title: "Kamachiq tablero", admin_products: "Imakuna", admin_categories: "Katiguriyakuna", admin_users: "Runakuna", admin_orders: "Nachakuna", empty_cart: "Canastayki ch'usaqmi", total: "Llapan chanin", currency: "Bs" }
+    es: { nav_home: "Inicio", nav_products: "Productos", nav_cart: "Carrito", nav_admin: "Admin", login: "Iniciar Sesión", logout: "Cerrar Sesión", welcome_title: "BIENVENIDO A GAMING COMPUTER", welcome_subtitle: "Los mejores accesorios informáticos y componentes gaming en Bolivia", products_title: "Nuestros Productos", cart_title: "Tu Carrito", checkout_btn: "Finalizar Pedido", admin_title: "Panel de Administración", admin_products: "Productos", admin_categories: "Categorías", admin_users: "Usuarios", admin_orders: "Pedidos", empty_cart: "Tu carrito está vacío", total: "Total", currency: "Bs", edit: "Editar", delete: "Eliminar", save: "Guardar" },
+    en: { nav_home: "Home", nav_products: "Products", nav_cart: "Cart", nav_admin: "Admin", login: "Login", logout: "Logout", welcome_title: "WELCOME TO GAMING COMPUTER", welcome_subtitle: "The best computer accessories in Bolivia", products_title: "Our Products", cart_title: "Your Cart", checkout_btn: "Checkout", admin_title: "Admin Panel", admin_products: "Products", admin_categories: "Categories", admin_users: "Users", admin_orders: "Orders", empty_cart: "Your cart is empty", total: "Total", currency: "Bs", add_product: "Add Product", edit: "Edit", delete: "Delete", save: "Save" },
+    qu: { nav_home: "Wasiman", nav_products: "Imakuna", nav_cart: "Rantina", nav_admin: "Kamachiq", login: "Yaykuy", logout: "Lluqsichiy", welcome_title: "GAMING COMPUTERMAN SUTIYAYKUY", welcome_subtitle: "Allin informática imakuna Boliviapi", products_title: "Imakuna", cart_title: "Rantina", checkout_btn: "Rantiy", admin_title: "Kamachiq tablero", admin_products: "Imakuna", admin_categories: "Katiguriyakuna", admin_users: "Runakuna", admin_orders: "Nachakuna", empty_cart: "Canastayki ch'usaqmi", total: "Llapan chanin", currency: "Bs", add_product: "Imata yapay", edit: "Huknachiy", delete: "Qichuy", save: "Waqaychay" }
 };
 
 function showToast(message, type = 'success') {
@@ -428,9 +428,11 @@ function closeCategoryModal() {
 function changeLanguage() {
     const select = document.getElementById('language-select');
     if (select) currentLang = select.value;
+    
+    // Traducir todos los elementos con data-i18n
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (translations[currentLang][key]) {
+        if (translations[currentLang] && translations[currentLang][key]) {
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 el.placeholder = translations[currentLang][key];
             } else {
@@ -438,10 +440,22 @@ function changeLanguage() {
             }
         }
     });
+    
+    // Actualizar productos y carrito
     displayProducts();
     displayCart();
+    
+    // Guardar idioma en localStorage para que persista
+    localStorage.setItem('gaming_lang', currentLang);
 }
 
+// Cargar idioma guardado al iniciar
+const savedLang = localStorage.getItem('gaming_lang');
+if (savedLang && translations[savedLang]) {
+    currentLang = savedLang;
+    document.getElementById('language-select').value = savedLang;
+    changeLanguage();
+}
 // ========== INICIALIZAR ==========
 loadCategories();
 loadProducts();
