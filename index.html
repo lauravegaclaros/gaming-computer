@@ -3,18 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaming Computer | Accesorios Informáticos</title>
+    <title>Gaming Computer | Tienda de Accesorios Informáticos</title>
+    <meta name="description" content="Los mejores componentes gaming y accesorios informáticos en Bolivia">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎮%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Barra de navegación -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">🎮 GAMING COMPUTER</div>
+            <div class="logo">
+                <span class="logo-gaming">GAMING</span>
+                <span class="logo-computer">COMPUTER</span>
+            </div>
             <div class="nav-links">
-                <a href="#" onclick="showPage('home')">Inicio</a>
-                <a href="#" onclick="showPage('products')">Productos</a>
-                <a href="#" id="cart-link" onclick="showPage('cart')">Carrito (<span id="cart-count">0</span>)</a>
+                <a href="#" onclick="showPage('home')" data-i18n="nav_home">Inicio</a>
+                <a href="#" onclick="showPage('products')" data-i18n="nav_products">Productos</a>
+                <a href="#" onclick="showPage('cart')" data-i18n="nav_cart">Carrito (<span id="cart-count">0</span>)</a>
+                <div id="admin-links" style="display: none;">
+                    <a href="#" onclick="showPage('admin')" data-i18n="nav_admin">Admin</a>
+                </div>
                 <div class="language-selector">
                     <select id="language-select" onchange="changeLanguage()">
                         <option value="es">🇪🇸 Español</option>
@@ -22,66 +29,85 @@
                         <option value="qu">🇵🇪 Quechua</option>
                     </select>
                 </div>
+                <div id="auth-buttons">
+                    <button id="login-btn" onclick="showLoginModal()" data-i18n="login">Iniciar Sesión</button>
+                    <button id="logout-btn" style="display: none;" onclick="logout()" data-i18n="logout">Cerrar Sesión</button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Contenido principal -->
     <main id="content">
-        <!-- Página de inicio -->
         <div id="home-page" class="page active">
             <div class="hero">
-                <h1>BIENVENIDO A GAMING COMPUTER</h1>
-                <p>Los mejores accesorios informáticos y componentes gaming</p>
+                <h1 data-i18n="welcome_title">BIENVENIDO A GAMING COMPUTER</h1>
+                <p data-i18n="welcome_subtitle">Los mejores accesorios informáticos y componentes gaming en Bolivia</p>
             </div>
             <div class="features">
-                <div class="feature-card">
-                    <h3>🚚 ENVÍOS RÁPIDOS</h3>
-                    <p>Entregas a todo el país</p>
-                </div>
-                <div class="feature-card">
-                    <h3>💳 PAGO SEGURO</h3>
-                    <p>Contraentrega, transferencia, Yape/Plin</p>
-                </div>
-                <div class="feature-card">
-                    <h3>🔧 GARANTÍA</h3>
-                    <p>Productos originales con garantía</p>
-                </div>
+                <div class="feature-card"><h3>🚚 ENVÍOS RÁPIDOS</h3><p>Entregas a todo Bolivia</p></div>
+                <div class="feature-card"><h3>💳 PAGO SEGURO</h3><p>Contraentrega, transferencia, QR</p></div>
+                <div class="feature-card"><h3>🔧 GARANTÍA</h3><p>Productos originales con garantía</p></div>
             </div>
         </div>
 
-        <!-- Página de productos -->
         <div id="products-page" class="page">
-            <h2>Nuestros Productos</h2>
+            <h2 data-i18n="products_title">Nuestros Productos</h2>
+            <div id="category-filters" class="category-filters"></div>
             <div id="products-container" class="products-grid"></div>
         </div>
 
-        <!-- Página del carrito -->
         <div id="cart-page" class="page">
-            <h2>Tu Carrito</h2>
+            <h2 data-i18n="cart_title">Tu Carrito</h2>
             <div id="cart-container"></div>
             <div id="cart-total" class="cart-total"></div>
-            <button onclick="checkout()" class="btn-primary">Finalizar Pedido</button>
+            <button onclick="checkout()" class="btn-primary" data-i18n="checkout_btn">Finalizar Pedido</button>
+        </div>
+
+        <div id="admin-page" class="page">
+            <h2 data-i18n="admin_title">Panel de Administración</h2>
+            <div class="admin-tabs">
+                <button onclick="showAdminTab('products')" data-i18n="admin_products">Productos</button>
+                <button onclick="showAdminTab('categories')" data-i18n="admin_categories">Categorías</button>
+                <button onclick="showAdminTab('users')" data-i18n="admin_users">Usuarios</button>
+                <button onclick="showAdminTab('orders')" data-i18n="admin_orders">Pedidos</button>
+            </div>
+            <div id="admin-products-tab" class="admin-tab active">
+                <button onclick="showProductModal()" class="btn-primary">+ Agregar Producto</button>
+                <div id="admin-products-list" class="products-grid"></div>
+            </div>
+            <div id="admin-categories-tab" class="admin-tab" style="display: none;">
+                <button onclick="showCategoryModal()" class="btn-primary">+ Agregar Categoría</button>
+                <div id="admin-categories-list" class="categories-grid"></div>
+            </div>
+            <div id="admin-users-tab" class="admin-tab" style="display: none;"><div id="users-list"></div></div>
+            <div id="admin-orders-tab" class="admin-tab" style="display: none;"><div id="orders-list"></div></div>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer>
         <div class="social-links">
-            <a href="#">📘 Facebook</a>
-            <a href="#">📷 Instagram</a>
-            <a href="#">💬 WhatsApp</a>
-            <a href="#">🎵 TikTok</a>
+            <a href="#">📘 Facebook</a><a href="#">📷 Instagram</a>
+            <a href="#">💬 WhatsApp</a><a href="#">🎵 TikTok</a>
         </div>
-        <p>© 2025 Gaming Computer - Todos los derechos reservados</p>
+        <p>© 2025 Gaming Computer - Todos los derechos reservados | Bolivia</p>
     </footer>
 
-    <!-- Botón flotante de WhatsApp -->
-    <a href="https://wa.me/51987654321?text=Hola%2C%20vengo%20de%20Gaming%20Computer.%20Me%20interesa%20un%20producto" 
-       class="whatsapp-float" target="_blank">
-        💬 ¿Dudas? Escríbenos
-    </a>
+    <a href="https://wa.me/59176543210?text=Hola%20Gaming%20Computer" class="whatsapp-float" target="_blank">💬 ¿Dudas? Escríbenos</a>
 
+    <!-- Modales -->
+    <div id="login-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeLoginModal()">&times;</span><h3>Iniciar Sesión</h3><input type="email" id="login-email" placeholder="Email" class="modal-input"><input type="password" id="login-password" placeholder="Contraseña" class="modal-input"><button onclick="login()" class="btn-primary">Ingresar</button><p><a href="#" onclick="showRegisterModal()">¿No tienes cuenta? Regístrate</a></p></div></div>
+    
+    <div id="register-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeRegisterModal()">&times;</span><h3>Registrarse</h3><input type="text" id="register-name" placeholder="Nombre completo" class="modal-input"><input type="email" id="register-email" placeholder="Email" class="modal-input"><input type="password" id="register-password" placeholder="Contraseña" class="modal-input"><select id="register-role" class="modal-input"><option value="cliente">Cliente</option></select><button onclick="register()" class="btn-primary">Registrarse</button></div></div>
+    
+    <div id="product-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeProductModal()">&times;</span><h3 id="product-modal-title">Agregar Producto</h3><input type="hidden" id="product-id"><input type="text" id="product-name" placeholder="Nombre" class="modal-input"><input type="number" id="product-price" placeholder="Precio (Bs)" class="modal-input"><input type="number" id="product-stock" placeholder="Stock" class="modal-input"><select id="product-category" class="modal-input"></select><input type="text" id="product-image" placeholder="Emoji" class="modal-input"><button onclick="saveProduct()" class="btn-primary">Guardar</button></div></div>
+    
+    <div id="category-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeCategoryModal()">&times;</span><h3 id="category-modal-title">Agregar Categoría</h3><input type="hidden" id="category-id"><input type="text" id="category-name" placeholder="Nombre" class="modal-input"><input type="text" id="category-icon" placeholder="Emoji (ej: 🎮)" class="modal-input"><button onclick="saveCategory()" class="btn-primary">Guardar</button></div></div>
+
+    <div id="toast-container"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
