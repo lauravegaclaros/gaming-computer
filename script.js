@@ -309,32 +309,117 @@ function checkout() {
 
 // ========== AUTENTICACIÓN ==========
 async function login() {
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
+    const emailInput = document.getElementById('login-email');
+    const passwordInput = document.getElementById('login-password');
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    
+    if (!email || !password) {
+        showToast('Por favor ingresa email y contraseña', 'error');
+        return;
+    }
+    
     try {
         await auth.signInWithEmailAndPassword(email, password);
-        showToast('Bienvenido', 'success');
+        showToast('Bienvenido a Gaming Computer', 'success');
+        
+        // Limpiar los campos después de iniciar sesión
+        emailInput.value = '';
+        passwordInput.value = '';
+        
         closeLoginModal();
-    } catch (error) { showToast(error.message, 'error'); }
+        
+        // Recargar la página para actualizar el rol
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    } catch (error) {
+        let errorMessage = 'Error al iniciar sesión';
+        switch (error.code) {
+            case 'auth/user-not-found':
+                errorMessage = 'Usuario no encontrado';
+                break;
+            case 'auth/wrong-password':
+                errorMessage = 'Contraseña incorrecta';
+                break;
+            case 'auth/invalid-email':
+                errorMessage = 'Email inválido';
+                break;
+            default:
+                errorMessage = error.message;
+        }
+        showToast(errorMessage, 'error');
+    }
 }
 
 async function register() {
-    const name = document.getElementById('register-name').value;
-    const email = document.getElementById('register-email').value;
-    const password = document.getElementById('register-password').value;
-    const role = document.getElementById('register-role').value;
+    const nameInput = document.getElementById('register-name');
+    const emailInput = document.getElementById('register-email');
+    const passwordInput = document.getElementById('register-password');
+    const roleSelect = document.getElementById('register-role');
+    
+    const name = nameInput.value;
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    const role = roleSelect.value;
+    
+    if (!name || !email || !password) {
+        showToast('Todos los campos son requeridos', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showToast('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+    }
+    
     try {
         const cred = await auth.createUserWithEmailAndPassword(email, password);
-        await database.ref(`users/${cred.user.uid}`).set({ name, email, role });
-        showToast('Registro exitoso', 'success');
+        await database.ref(`users/${cred.user.uid}`).set({ 
+            name, 
+            email, 
+            role,
+            createdAt: new Date().toISOString()
+        });
+        showToast('Registro exitoso. ¡Bienvenido!', 'success');
+        
+        // Limpiar los campos
+        nameInput.value = '';
+        emailInput.value = '';
+        passwordInput.value = '';
+        roleSelect.value = 'cliente';
+        
         closeRegisterModal();
-    } catch (error) { showToast(error.message, 'error'); }
+        
+        // Recargar para actualizar el estado
+        setTimeout(() => {
+            location.reload();
+        }, 1500);
+    } catch (error) {
+        let errorMessage = 'Error en el registro';
+        if (error.code === 'auth/email-already-in-use') {
+            errorMessage = 'Este email ya está registrado';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'Email inválido';
+        } else {
+            errorMessage = error.message;
+        }
+        showToast(errorMessage, 'error');
+    }
 }
 
 function logout() {
     auth.signOut();
-    showToast('Sesión cerrada', 'info');
-    updateAuthUI();
+    showToast('Sesión cerrada correctamente', 'info');
+    
+    // Limpiar el carrito local
+    cart = [];
+    updateCartCount();
+    
+    // Recargar para resetear el estado
+    setTimeout(() => {
+        location.reload();
+    }, 500);
 }
 
 function updateAuthUI() {
