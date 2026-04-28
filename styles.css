@@ -267,6 +267,7 @@ footer { text-align: center; padding: 2rem; background: var(--gaming-primary); m
     .hero h1 { font-size: 1.5rem; }
 }
 /* Estilos para subida de imágenes */
+/* Estilos para subida de imágenes */
 .image-upload-area {
     background: rgba(10, 15, 28, 0.5);
     border: 1px dashed var(--gaming-accent);
