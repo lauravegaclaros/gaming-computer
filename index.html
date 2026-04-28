@@ -2,10 +2,23 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaming Computer | Tienda de Accesorios Informáticos</title>
-    <meta name="description" content="Los mejores componentes gaming y accesorios informáticos en Bolivia">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    
+    <!-- SEO Meta Tags -->
+    <title>Gaming Computer | Tienda de Accesorios Informáticos en Bolivia</title>
+    <meta name="description" content="Los mejores componentes gaming, laptops, gabinetes y accesorios informáticos en Bolivia. Envíos a todo el país.">
+    <meta name="keywords" content="gaming, computadoras, laptops, gabinetes, procesadores, teclados, monitores, Bolivia">
+    <meta name="author" content="Gaming Computer">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Gaming Computer - Tienda Gaming en Bolivia">
+    <meta property="og:description" content="Los mejores accesorios informáticos y componentes gaming en Bolivia.">
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎮%3C/text%3E%3C/svg%3E">
+    
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -38,6 +51,7 @@
     </nav>
 
     <main id="content">
+        <!-- Home -->
         <div id="home-page" class="page active">
             <div class="hero">
                 <h1 data-i18n="welcome_title">BIENVENIDO A GAMING COMPUTER</h1>
@@ -50,12 +64,14 @@
             </div>
         </div>
 
+        <!-- Productos -->
         <div id="products-page" class="page">
             <h2 data-i18n="products_title">Nuestros Productos</h2>
             <div id="category-filters" class="category-filters"></div>
             <div id="products-container" class="products-grid"></div>
         </div>
 
+        <!-- Carrito -->
         <div id="cart-page" class="page">
             <h2 data-i18n="cart_title">Tu Carrito</h2>
             <div id="cart-container"></div>
@@ -63,6 +79,7 @@
             <button onclick="checkout()" class="btn-primary" data-i18n="checkout_btn">Finalizar Pedido</button>
         </div>
 
+        <!-- Admin Panel -->
         <div id="admin-page" class="page">
             <h2 data-i18n="admin_title">Panel de Administración</h2>
             <div class="admin-tabs">
@@ -85,25 +102,84 @@
     </main>
 
     <footer>
-       <div class="social-links">
-    <a href="https://www.facebook.com/arualale" target="_blank" rel="noopener noreferrer">📘 Facebook</a>
-    <a href="https://www.instagram.com/arualale/" target="_blank" rel="noopener noreferrer">📷 Instagram</a>
-    <a href="https://wa.me/59161832844" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
-    <a href="https://tiktok.com/@gamingcomputer" target="_blank" rel="noopener noreferrer">🎵 TikTok</a>
+        <div class="social-links">
+            <a href="#" target="_blank">📘 Facebook</a>
+            <a href="#" target="_blank">📷 Instagram</a>
+            <a href="https://wa.me/59176543210" target="_blank">💬 WhatsApp</a>
+            <a href="#" target="_blank">🎵 TikTok</a>
         </div>
         <p>© 2025 Gaming Computer - Todos los derechos reservados | Bolivia</p>
     </footer>
 
     <a href="https://wa.me/59176543210?text=Hola%20Gaming%20Computer" class="whatsapp-float" target="_blank">💬 ¿Dudas? Escríbenos</a>
 
-    <!-- Modales -->
-    <div id="login-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeLoginModal()">&times;</span><h3>Iniciar Sesión</h3><input type="email" id="login-email" placeholder="Email" class="modal-input"><input type="password" id="login-password" placeholder="Contraseña" class="modal-input"><button onclick="login()" class="btn-primary">Ingresar</button><p><a href="#" onclick="showRegisterModal()">¿No tienes cuenta? Regístrate</a></p></div></div>
+    <!-- MODALES -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h3>Iniciar Sesión</h3>
+            <input type="email" id="login-email" placeholder="Email" class="modal-input">
+            <input type="password" id="login-password" placeholder="Contraseña" class="modal-input">
+            <button onclick="login()" class="btn-primary">Ingresar</button>
+            <p><a href="#" onclick="showRegisterModal()">¿No tienes cuenta? Regístrate</a></p>
+        </div>
+    </div>
     
-    <div id="register-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeRegisterModal()">&times;</span><h3>Registrarse</h3><input type="text" id="register-name" placeholder="Nombre completo" class="modal-input"><input type="email" id="register-email" placeholder="Email" class="modal-input"><input type="password" id="register-password" placeholder="Contraseña" class="modal-input"><select id="register-role" class="modal-input"><option value="cliente">Cliente</option></select><button onclick="register()" class="btn-primary">Registrarse</button></div></div>
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <h3>Registrarse</h3>
+            <input type="text" id="register-name" placeholder="Nombre completo" class="modal-input">
+            <input type="email" id="register-email" placeholder="Email" class="modal-input">
+            <input type="password" id="register-password" placeholder="Contraseña" class="modal-input">
+            <select id="register-role" class="modal-input">
+                <option value="cliente">Cliente</option>
+            </select>
+            <button onclick="register()" class="btn-primary">Registrarse</button>
+        </div>
+    </div>
     
-    <div id="product-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeProductModal()">&times;</span><h3 id="product-modal-title">Agregar Producto</h3><input type="hidden" id="product-id"><input type="text" id="product-name" placeholder="Nombre" class="modal-input"><input type="number" id="product-price" placeholder="Precio (Bs)" class="modal-input"><input type="number" id="product-stock" placeholder="Stock" class="modal-input"><select id="product-category" class="modal-input"></select><input type="text" id="product-image" placeholder="Emoji" class="modal-input"><button onclick="saveProduct()" class="btn-primary">Guardar</button></div></div>
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeProductModal()">&times;</span>
+            <h3 id="product-modal-title">Agregar Producto</h3>
+            <input type="hidden" id="product-id">
+            <input type="text" id="product-name" placeholder="Nombre del producto" class="modal-input">
+            <input type="number" id="product-price" placeholder="Precio (Bs)" class="modal-input">
+            <input type="number" id="product-stock" placeholder="Stock" class="modal-input">
+            <select id="product-category" class="modal-input"></select>
+            
+            <!-- Área de subida de imágenes -->
+            <div class="image-upload-area">
+                <label class="btn-secondary" style="display: inline-block; background: var(--gaming-dark); padding: 8px 16px; border-radius: 8px; cursor: pointer;">
+                    📁 Seleccionar imagen de tu computadora
+                </label>
+                <input type="text" id="product-image-url" placeholder="O pega una URL de imagen (https://...)" class="modal-input" style="margin-top: 10px;">
+                <div style="margin-top: 10px;">
+                    <button type="button" onclick="uploadToImgBB()" class="btn-secondary" style="background: #5e2bff;">📤 Subir imagen a ImgBB</button>
+                    <small style="display: block; margin-top: 5px; color: #aaa;">(Selecciona una imagen de tu computadora y se subirá automáticamente)</small>
+                </div>
+                <div id="image-preview" style="margin-top: 10px; display: none;">
+                    <img id="image-preview-img" src="" style="max-width: 100%; max-height: 150px; border-radius: 10px;">
+                    <button type="button" onclick="clearImagePreview()" style="margin-top: 5px; padding: 4px 8px;">🗑️ Eliminar imagen</button>
+                </div>
+                <div id="upload-status" style="font-size: 0.8rem; margin-top: 5px; color: var(--gaming-accent);"></div>
+            </div>
+            
+            <button onclick="saveProduct()" class="btn-primary">Guardar Producto</button>
+        </div>
+    </div>
     
-    <div id="category-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeCategoryModal()">&times;</span><h3 id="category-modal-title">Agregar Categoría</h3><input type="hidden" id="category-id"><input type="text" id="category-name" placeholder="Nombre" class="modal-input"><input type="text" id="category-icon" placeholder="Emoji (ej: 🎮)" class="modal-input"><button onclick="saveCategory()" class="btn-primary">Guardar</button></div></div>
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCategoryModal()">&times;</span>
+            <h3 id="category-modal-title">Agregar Categoría</h3>
+            <input type="hidden" id="category-id">
+            <input type="text" id="category-name" placeholder="Nombre de la categoría" class="modal-input">
+            <input type="text" id="category-icon" placeholder="Emoji (ej: 🎮, 💻, 📦)" class="modal-input">
+            <button onclick="saveCategory()" class="btn-primary">Guardar Categoría</button>
+        </div>
+    </div>
 
     <div id="toast-container"></div>
 
