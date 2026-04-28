@@ -1,5 +1,4 @@
 // ========== CONFIGURACIÓN DE FIREBASE ==========
-// ⚠️ REEMPLAZA con los datos de TU proyecto Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDZs60_QB-0XxiTDSWpU7S2U-IXwJob_-g",
   authDomain: "gaming-computer-bab13.firebaseapp.com",
