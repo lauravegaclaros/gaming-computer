@@ -266,3 +266,34 @@ footer { text-align: center; padding: 2rem; background: var(--gaming-primary); m
     .nav-container { flex-direction: column; gap: 1rem; }
     .hero h1 { font-size: 1.5rem; }
 }
+/* Estilos para subida de imágenes */
+.image-upload-area {
+    background: rgba(10, 15, 28, 0.5);
+    border: 1px dashed var(--gaming-accent);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.btn-secondary {
+    background: var(--gaming-dark);
+    border: 1px solid var(--gaming-accent);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    background: var(--gaming-accent);
+    color: var(--gaming-dark);
+}
+
+#image-preview {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
