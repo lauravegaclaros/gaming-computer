@@ -1,13 +1,12 @@
 // ========== CONFIGURACIÓN DE FIREBASE ==========
 // ⚠️ REEMPLAZA con los datos de TU proyecto Firebase
 const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "gaming-computer-bab13.firebaseapp.com",
-    databaseURL: "https://gaming-computer-bab13-default-rtdb.firebaseio.com",
-    projectId: "gaming-computer-bab13",
-    storageBucket: "gaming-computer-bab13.appspot.com",
-    messagingSenderId: "TU_SENDER_ID",
-    appId: "TU_APP_ID"
+    apiKey: "AIzaSyDZs60_QB-0XxiTDSWpU7S2U-IXwJob_-g",
+  authDomain: "gaming-computer-bab13.firebaseapp.com",
+  projectId: "gaming-computer-bab13",
+  storageBucket: "gaming-computer-bab13.firebasestorage.app",
+  messagingSenderId: "865232123365",
+  appId: "1:865232123365:web:1de5fd497495aaeb622b0c"
 };
 
 firebase.initializeApp(firebaseConfig);
