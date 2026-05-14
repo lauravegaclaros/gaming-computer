@@ -742,4 +742,8 @@ function changeLanguage() {
     }
 }
 
-// ========== INICIALIZ
+// ========== INICIALIZAR ==========
+setupImageUpload();
+loadCategories();
+loadProducts();
+updateCartCount();
