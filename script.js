@@ -1,5 +1,5 @@
 // ========== CONFIGURACIÓN DE FIREBASE ==========
-// ⚠️ REEMPLAZA con los datos de TU proyecto Firebase
+// ⚠️ REEMPLAZA con los datos de TU proyecto Firebase (copia exacta de Firebase Console)
 const firebaseConfig = {
   apiKey: "AIzaSyDZs60_QB-0XxiTDSWpU7S2U-IXwJob_-g",
   authDomain: "gaming-computer-bab13.firebaseapp.com",
@@ -10,6 +10,7 @@ const firebaseConfig = {
   appId: "1:865232123365:web:1de5fd497495aaeb622b0c"
 };
 
+// Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
@@ -28,14 +29,19 @@ function showToast(message, type = 'success') {
     if (!container) return;
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.style.background = type === 'error' ? '#1a2a4f' : '#1a2a4f';
+    toast.style.background = '#1a2a4f';
     toast.style.borderLeft = type === 'error' ? '4px solid #ff4444' : '4px solid #00ff88';
+    toast.style.padding = '12px';
+    toast.style.marginTop = '10px';
+    toast.style.borderRadius = '8px';
+    toast.style.minWidth = '250px';
+    toast.style.animation = 'slideIn 0.3s ease';
     toast.innerHTML = `<strong>Gaming Computer</strong><br>${message}`;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
 
-// ========== SUBIDA DE IMÁGENES A IMGBB ==========
+// ========== SUBIDA DE IMÁGENES ==========
 function setupImageUpload() {
     const fileInput = document.getElementById('product-image-file');
     if (!fileInput) return;
@@ -91,8 +97,6 @@ function clearImagePreview() {
     if (preview) preview.style.display = 'none';
     const statusDiv = document.getElementById('upload-status');
     if (statusDiv) statusDiv.innerHTML = '';
-    const fileInput = document.getElementById('product-image-file');
-    if (fileInput) fileInput.value = '';
 }
 
 function setCategoryIcon(icon) {
@@ -298,11 +302,6 @@ async function saveProduct() {
         return;
     }
     
-    if (!category) {
-        showToast('Selecciona una categoría', 'error');
-        return;
-    }
-    
     const product = {
         name, price, stock, category,
         imageUrl: imageUrl || null,
@@ -420,6 +419,7 @@ function checkout() {
         showToast('Agrega productos al carrito', 'error');
         return;
     }
+    
     const total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
     const order = {
         items: cart.map(item => ({ id: item.id, name: item.name, quantity: item.quantity, price: item.price })),
@@ -430,16 +430,20 @@ function checkout() {
         customerName: auth.currentUser ? auth.currentUser.email : 'Invitado'
     };
     
-    database.ref('orders').push(order).then(() => {
-        const msg = `Hola, quiero comprar:%0A${cart.map(i => `- ${i.name} x${i.quantity}: Bs ${(i.price * i.quantity).toFixed(2)}`).join('%0A')}%0ATOTAL: Bs ${total.toFixed(2)}%0A%0A Mi correo: ${auth.currentUser?.email || 'invitado'}`;
-        window.open(`https://wa.me/59161832844?text=${msg}`, '_blank');
-        cart = [];
-        updateCartCount();
-        displayCart();
-        showToast('✅ Pedido realizado con éxito');
-    }).catch(error => {
-        showToast('Error al guardar pedido: ' + error.message, 'error');
-    });
+    // Primero guardar en Firebase, luego enviar WhatsApp
+    database.ref('orders').push(order)
+        .then(() => {
+            const msg = `Hola, quiero comprar:%0A${cart.map(i => `- ${i.name} x${i.quantity}: Bs ${(i.price * i.quantity).toFixed(2)}`).join('%0A')}%0ATOTAL: Bs ${total.toFixed(2)}%0A%0A Mi correo: ${auth.currentUser?.email || 'invitado'}`;
+            window.open(`https://wa.me/59161832844?text=${msg}`, '_blank');
+            cart = [];
+            updateCartCount();
+            displayCart();
+            showToast('✅ Pedido realizado con éxito');
+        })
+        .catch(error => {
+            console.error('Error detallado:', error);
+            showToast('Error al guardar pedido: ' + error.message, 'error');
+        });
 }
 
 // ========== USUARIOS ==========
@@ -457,24 +461,24 @@ async function loadUsers() {
         }
         
         container.innerHTML = `
-            <table class="users-table">
+            <table class="users-table" style="width:100%; border-collapse:collapse;">
                 <thead>
-                    <tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Acciones</th></tr>
+                    <tr style="background:#1a2a4f;"><th style="padding:10px; text-align:left;">Nombre</th><th>Email</th><th>Rol</th><th>Acciones</th></tr>
                 </thead>
                 <tbody>
                     ${Object.entries(users).map(([uid, user]) => `
-                        <tr>
-                            <td>${user.name || '-'}</td>
+                        <tr style="border-bottom:1px solid #00d4ff33;">
+                            <td style="padding:10px;">${user.name || '-'}</td>
                             <td>${user.email}</td>
                             <td>
-                                <select onchange="updateUserRole('${uid}', this.value)">
+                                <select onchange="updateUserRole('${uid}', this.value)" style="background:#0a0f1c; color:white; border:1px solid #00d4ff; padding:5px; border-radius:5px;">
                                     <option value="cliente" ${user.role === 'cliente' ? 'selected' : ''}>👤 Cliente</option>
                                     <option value="asistente" ${user.role === 'asistente' ? 'selected' : ''}>🛠️ Asistente</option>
                                     <option value="vendedor" ${user.role === 'vendedor' ? 'selected' : ''}>💰 Vendedor</option>
                                     <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Admin</option>
                                 </select>
                             </td>
-                            <td><button onclick="deleteUser('${uid}')">🗑️ Eliminar</button></td>
+                            <td><button onclick="deleteUser('${uid}')" style="padding:5px 10px;">🗑️ Eliminar</button></td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -521,6 +525,10 @@ async function createUserByAdmin() {
         showToast('Usuario creado exitosamente');
         closeUserModal();
         loadUsers();
+        // Limpiar campos
+        document.getElementById('user-name').value = '';
+        document.getElementById('user-email').value = '';
+        document.getElementById('user-password').value = '';
     } catch (error) {
         showToast('Error al crear usuario: ' + error.message, 'error');
     }
@@ -540,18 +548,18 @@ async function loadOrders() {
         }
         
         container.innerHTML = `
-            <table class="orders-table">
+            <table class="orders-table" style="width:100%; border-collapse:collapse;">
                 <thead>
-                    <tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
+                    <tr style="background:#1a2a4f;"><th style="padding:10px;">ID</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
                 </thead>
                 <tbody>
                     ${Object.entries(orders).map(([id, order]) => `
-                        <tr>
-                            <td>${id.slice(-6)}</td>
+                        <tr style="border-bottom:1px solid #00d4ff33;">
+                            <td style="padding:10px;">${id.slice(-6)}</td>
                             <td>${order.customerName || order.customerEmail || '-'}</td>
                             <td>Bs ${(order.total || 0).toFixed(2)}</td>
                             <td>
-                                <select onchange="updateOrderStatus('${id}', this.value)">
+                                <select onchange="updateOrderStatus('${id}', this.value)" style="background:#0a0f1c; color:white; border:1px solid #00d4ff; padding:5px; border-radius:5px;">
                                     <option value="pendiente" ${order.status === 'pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
                                     <option value="confirmado" ${order.status === 'confirmado' ? 'selected' : ''}>✅ Confirmado</option>
                                     <option value="enviado" ${order.status === 'enviado' ? 'selected' : ''}>📦 Enviado</option>
@@ -595,7 +603,8 @@ async function login() {
         closeLoginModal();
         setTimeout(() => location.reload(), 500);
     } catch (error) {
-        showToast(error.message, 'error');
+        console.error('Login error:', error);
+        showToast('Error: ' + error.message, 'error');
     }
 }
 
@@ -622,7 +631,8 @@ async function register() {
         closeRegisterModal();
         setTimeout(() => location.reload(), 1500);
     } catch (error) {
-        showToast(error.message, 'error');
+        console.error('Register error:', error);
+        showToast('Error: ' + error.message, 'error');
     }
 }
 
@@ -644,16 +654,20 @@ function updateAuthUI() {
 
 auth.onAuthStateChanged(async (user) => {
     if (user) {
-        const snap = await database.ref(`users/${user.uid}`).once('value');
-        const userData = snap.val();
-        currentUserRole = userData?.role || 'cliente';
+        try {
+            const snap = await database.ref(`users/${user.uid}`).once('value');
+            const userData = snap.val();
+            currentUserRole = userData?.role || 'cliente';
+        } catch (error) {
+            currentUserRole = 'cliente';
+        }
     } else {
         currentUserRole = 'invitado';
     }
     updateAuthUI();
     if (currentUserRole === 'admin' || currentUserRole === 'asistente') {
         renderAdminCategories();
-        if (document.getElementById('admin-page').classList.contains('active')) {
+        if (document.getElementById('admin-page') && document.getElementById('admin-page').classList.contains('active')) {
             loadUsers();
             loadOrders();
         }
@@ -683,31 +697,12 @@ function showAdminTab(tab) {
     if (tab === 'orders') loadOrders();
 }
 
-function showLoginModal() { 
-    const modal = document.getElementById('login-modal');
-    if (modal) modal.style.display = 'block';
-}
-function closeLoginModal() { 
-    const modal = document.getElementById('login-modal');
-    if (modal) modal.style.display = 'none';
-}
-function showRegisterModal() { 
-    closeLoginModal(); 
-    const modal = document.getElementById('register-modal');
-    if (modal) modal.style.display = 'block';
-}
-function closeRegisterModal() { 
-    const modal = document.getElementById('register-modal');
-    if (modal) modal.style.display = 'none';
-}
-function showUserModal() { 
-    const modal = document.getElementById('user-modal');
-    if (modal) modal.style.display = 'block';
-}
-function closeUserModal() { 
-    const modal = document.getElementById('user-modal');
-    if (modal) modal.style.display = 'none';
-}
+function showLoginModal() { const modal = document.getElementById('login-modal'); if (modal) modal.style.display = 'block'; }
+function closeLoginModal() { const modal = document.getElementById('login-modal'); if (modal) modal.style.display = 'none'; }
+function showRegisterModal() { closeLoginModal(); const modal = document.getElementById('register-modal'); if (modal) modal.style.display = 'block'; }
+function closeRegisterModal() { const modal = document.getElementById('register-modal'); if (modal) modal.style.display = 'none'; }
+function showUserModal() { const modal = document.getElementById('user-modal'); if (modal) modal.style.display = 'block'; }
+function closeUserModal() { const modal = document.getElementById('user-modal'); if (modal) modal.style.display = 'none'; }
 function showProductModal() {
     document.getElementById('product-id').value = '';
     document.getElementById('product-name').value = '';
@@ -719,10 +714,7 @@ function showProductModal() {
     const modal = document.getElementById('product-modal');
     if (modal) modal.style.display = 'block';
 }
-function closeProductModal() { 
-    const modal = document.getElementById('product-modal');
-    if (modal) modal.style.display = 'none';
-}
+function closeProductModal() { const modal = document.getElementById('product-modal'); if (modal) modal.style.display = 'none'; }
 function showCategoryModal() {
     document.getElementById('category-id').value = '';
     document.getElementById('category-name').value = '';
@@ -731,10 +723,7 @@ function showCategoryModal() {
     const modal = document.getElementById('category-modal');
     if (modal) modal.style.display = 'block';
 }
-function closeCategoryModal() { 
-    const modal = document.getElementById('category-modal');
-    if (modal) modal.style.display = 'none';
-}
+function closeCategoryModal() { const modal = document.getElementById('category-modal'); if (modal) modal.style.display = 'none'; }
 
 function changeLanguage() {
     const select = document.getElementById('language-select');
@@ -753,8 +742,4 @@ function changeLanguage() {
     }
 }
 
-// ========== INICIALIZAR ==========
-setupImageUpload();
-loadCategories();
-loadProducts();
-updateCartCount();
+// ========== INICIALIZ
