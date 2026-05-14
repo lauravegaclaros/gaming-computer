@@ -1,12 +1,13 @@
 // ========== CONFIGURACIÓN DE FIREBASE ==========
 // ⚠️ REEMPLAZA con los datos de TU proyecto Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyDZs60_QB-0XxiTDSWpU7S2U-IXwJob_-g",
-  authDomain: "gaming-computer-bab13.firebaseapp.com",
-  projectId: "gaming-computer-bab13",
-  storageBucket: "gaming-computer-bab13.firebasestorage.app",
-  messagingSenderId: "865232123365",
-  appId: "1:865232123365:web:1de5fd497495aaeb622b0c"
+    apiKey: "TU_API_KEY",
+    authDomain: "gaming-computer-bab13.firebaseapp.com",
+    databaseURL: "https://gaming-computer-bab13-default-rtdb.firebaseio.com",
+    projectId: "gaming-computer-bab13",
+    storageBucket: "gaming-computer-bab13.appspot.com",
+    messagingSenderId: "TU_SENDER_ID",
+    appId: "TU_APP_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -20,13 +21,15 @@ let cart = [];
 let currentUserRole = 'invitado';
 let currentLang = 'es';
 let currentCategory = 'all';
-let currentUser = null;
 
 // ========== FUNCIONES AUXILIARES ==========
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = 'toast';
+    toast.style.background = type === 'error' ? '#1a2a4f' : '#1a2a4f';
+    toast.style.borderLeft = type === 'error' ? '4px solid #ff4444' : '4px solid #00ff88';
     toast.innerHTML = `<strong>Gaming Computer</strong><br>${message}`;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
@@ -47,7 +50,7 @@ function setupImageUpload() {
         }
         
         const statusDiv = document.getElementById('upload-status');
-        statusDiv.innerHTML = '📤 Subiendo imagen...';
+        if (statusDiv) statusDiv.innerHTML = '📤 Subiendo imagen...';
         
         const formData = new FormData();
         formData.append('image', file);
@@ -61,55 +64,66 @@ function setupImageUpload() {
             
             if (result.success) {
                 const imageUrl = result.data.url;
-                document.getElementById('product-image-url').value = imageUrl;
+                const urlInput = document.getElementById('product-image-url');
+                if (urlInput) urlInput.value = imageUrl;
+                
                 const preview = document.getElementById('image-preview');
                 const previewImg = document.getElementById('image-preview-img');
-                previewImg.src = imageUrl;
-                preview.style.display = 'block';
-                statusDiv.innerHTML = '✅ Imagen subida correctamente';
+                if (previewImg) previewImg.src = imageUrl;
+                if (preview) preview.style.display = 'block';
+                if (statusDiv) statusDiv.innerHTML = '✅ Imagen subida correctamente';
                 showToast('Imagen subida con éxito');
             } else {
-                statusDiv.innerHTML = '❌ Error al subir';
+                if (statusDiv) statusDiv.innerHTML = '❌ Error al subir';
                 showToast('Error al subir imagen', 'error');
             }
         } catch (error) {
-            statusDiv.innerHTML = '❌ Error de conexión';
+            if (statusDiv) statusDiv.innerHTML = '❌ Error de conexión';
             showToast('Error de conexión', 'error');
         }
     };
 }
 
 function clearImagePreview() {
-    document.getElementById('product-image-url').value = '';
-    document.getElementById('image-preview').style.display = 'none';
-    document.getElementById('upload-status').innerHTML = '';
-    document.getElementById('product-image-file').value = '';
+    const urlInput = document.getElementById('product-image-url');
+    if (urlInput) urlInput.value = '';
+    const preview = document.getElementById('image-preview');
+    if (preview) preview.style.display = 'none';
+    const statusDiv = document.getElementById('upload-status');
+    if (statusDiv) statusDiv.innerHTML = '';
+    const fileInput = document.getElementById('product-image-file');
+    if (fileInput) fileInput.value = '';
 }
 
 function setCategoryIcon(icon) {
-    document.getElementById('category-icon').value = icon;
+    const iconInput = document.getElementById('category-icon');
+    if (iconInput) iconInput.value = icon;
 }
 
 // ========== CATEGORÍAS ==========
 async function loadCategories() {
-    const snapshot = await database.ref('categories').once('value');
-    const data = snapshot.val();
-    if (data) {
-        categories = Object.entries(data).map(([id, cat]) => ({ id, ...cat }));
-    } else {
-        categories = [
-            { id: "cat1", name: "Gabinetes", icon: "📦" },
-            { id: "cat2", name: "Laptops", icon: "💻" },
-            { id: "cat3", name: "Procesadores", icon: "⚙️" },
-            { id: "cat4", name: "Teclados", icon: "⌨️" },
-            { id: "cat5", name: "Monitores", icon: "🖥️" },
-            { id: "cat6", name: "Periféricos", icon: "🎮" }
-        ];
-        await saveCategoriesToFirebase();
+    try {
+        const snapshot = await database.ref('categories').once('value');
+        const data = snapshot.val();
+        if (data) {
+            categories = Object.entries(data).map(([id, cat]) => ({ id, ...cat }));
+        } else {
+            categories = [
+                { id: "cat1", name: "Gabinetes", icon: "📦" },
+                { id: "cat2", name: "Laptops", icon: "💻" },
+                { id: "cat3", name: "Procesadores", icon: "⚙️" },
+                { id: "cat4", name: "Teclados", icon: "⌨️" },
+                { id: "cat5", name: "Monitores", icon: "🖥️" },
+                { id: "cat6", name: "Periféricos", icon: "🎮" }
+            ];
+            await saveCategoriesToFirebase();
+        }
+        renderCategoryFilters();
+        renderCategorySelect();
+        if (currentUserRole === 'admin' || currentUserRole === 'asistente') renderAdminCategories();
+    } catch (error) {
+        showToast('Error al cargar categorías', 'error');
     }
-    renderCategoryFilters();
-    renderCategorySelect();
-    if (currentUserRole === 'admin' || currentUserRole === 'asistente') renderAdminCategories();
 }
 
 async function saveCategoriesToFirebase() {
@@ -136,17 +150,21 @@ async function saveCategory() {
     const name = document.getElementById('category-name').value;
     const icon = document.getElementById('category-icon').value || '📦';
     if (!name) { showToast('El nombre es requerido', 'error'); return; }
-    if (id) {
-        await database.ref(`categories/${id}`).update({ name, icon });
-        showToast('Categoría actualizada');
-    } else {
-        const newId = Date.now().toString();
-        await database.ref(`categories/${newId}`).set({ name, icon });
-        showToast('Categoría creada');
+    try {
+        if (id) {
+            await database.ref(`categories/${id}`).update({ name, icon });
+            showToast('Categoría actualizada');
+        } else {
+            const newId = Date.now().toString();
+            await database.ref(`categories/${newId}`).set({ name, icon });
+            showToast('Categoría creada');
+        }
+        closeCategoryModal();
+        await loadCategories();
+        await loadProducts();
+    } catch (error) {
+        showToast('Error al guardar categoría', 'error');
     }
-    closeCategoryModal();
-    await loadCategories();
-    await loadProducts();
 }
 
 async function deleteCategory(categoryId) {
@@ -166,6 +184,10 @@ async function deleteCategory(categoryId) {
 function renderAdminCategories() {
     const container = document.getElementById('admin-categories-list');
     if (!container) return;
+    if (categories.length === 0) {
+        container.innerHTML = '<p>No hay categorías. Agrega tu primera categoría.</p>';
+        return;
+    }
     container.innerHTML = categories.map(cat => `
         <div class="category-card">
             <div style="font-size: 3rem;">${cat.icon}</div>
@@ -191,26 +213,18 @@ function editCategory(categoryId) {
 
 // ========== PRODUCTOS ==========
 async function loadProducts() {
-    const snapshot = await database.ref('products').once('value');
-    const data = snapshot.val();
-    if (data) {
-        products = Object.entries(data).map(([id, product]) => ({ id, ...product }));
-    } else {
-        products = [];
-        await saveProductsToFirebase();
+    try {
+        const snapshot = await database.ref('products').once('value');
+        const data = snapshot.val();
+        if (data) {
+            products = Object.entries(data).map(([id, product]) => ({ id, ...product }));
+        } else {
+            products = [];
+        }
+        displayProducts();
+    } catch (error) {
+        showToast('Error al cargar productos', 'error');
     }
-    displayProducts();
-}
-
-async function saveProductsToFirebase() {
-    const updates = {};
-    products.forEach(product => {
-        updates[`products/${product.id}`] = {
-            name: product.name, price: product.price, stock: product.stock,
-            category: product.category, imageUrl: product.imageUrl || null
-        };
-    });
-    await database.ref().update(updates);
 }
 
 function filterProducts(category) {
@@ -280,7 +294,12 @@ async function saveProduct() {
     const imageUrl = document.getElementById('product-image-url').value;
     
     if (!name || isNaN(price) || isNaN(stock)) {
-        showToast('Todos los campos son requeridos', 'error');
+        showToast('Nombre, precio y stock son requeridos', 'error');
+        return;
+    }
+    
+    if (!category) {
+        showToast('Selecciona una categoría', 'error');
         return;
     }
     
@@ -302,7 +321,7 @@ async function saveProduct() {
         closeProductModal();
         await loadProducts();
     } catch (error) {
-        showToast('Error al guardar producto', 'error');
+        showToast('Error al guardar producto: ' + error.message, 'error');
     }
 }
 
@@ -327,8 +346,8 @@ function editProduct(productId) {
         if (product.imageUrl) {
             const preview = document.getElementById('image-preview');
             const previewImg = document.getElementById('image-preview-img');
-            previewImg.src = product.imageUrl;
-            preview.style.display = 'block';
+            if (previewImg) previewImg.src = product.imageUrl;
+            if (preview) preview.style.display = 'block';
         } else {
             clearImagePreview();
         }
@@ -413,52 +432,57 @@ function checkout() {
     
     database.ref('orders').push(order).then(() => {
         const msg = `Hola, quiero comprar:%0A${cart.map(i => `- ${i.name} x${i.quantity}: Bs ${(i.price * i.quantity).toFixed(2)}`).join('%0A')}%0ATOTAL: Bs ${total.toFixed(2)}%0A%0A Mi correo: ${auth.currentUser?.email || 'invitado'}`;
-        window.open(`https://wa.me/59176543210?text=${msg}`, '_blank');
+        window.open(`https://wa.me/59161832844?text=${msg}`, '_blank');
         cart = [];
         updateCartCount();
         displayCart();
         showToast('✅ Pedido realizado con éxito');
     }).catch(error => {
-        showToast('Error al guardar pedido', 'error');
+        showToast('Error al guardar pedido: ' + error.message, 'error');
     });
 }
 
 // ========== USUARIOS ==========
 async function loadUsers() {
     if (currentUserRole !== 'admin') return;
-    const snapshot = await database.ref('users').once('value');
-    const users = snapshot.val();
-    const container = document.getElementById('users-list');
-    if (!container) return;
-    
-    if (!users || Object.keys(users).length === 0) {
-        container.innerHTML = '<p>No hay usuarios registrados</p>';
-        return;
+    try {
+        const snapshot = await database.ref('users').once('value');
+        const users = snapshot.val();
+        const container = document.getElementById('users-list');
+        if (!container) return;
+        
+        if (!users || Object.keys(users).length === 0) {
+            container.innerHTML = '<p>No hay usuarios registrados</p>';
+            return;
+        }
+        
+        container.innerHTML = `
+            <table class="users-table">
+                <thead>
+                    <tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Acciones</th></tr>
+                </thead>
+                <tbody>
+                    ${Object.entries(users).map(([uid, user]) => `
+                        <tr>
+                            <td>${user.name || '-'}</td>
+                            <td>${user.email}</td>
+                            <td>
+                                <select onchange="updateUserRole('${uid}', this.value)">
+                                    <option value="cliente" ${user.role === 'cliente' ? 'selected' : ''}>👤 Cliente</option>
+                                    <option value="asistente" ${user.role === 'asistente' ? 'selected' : ''}>🛠️ Asistente</option>
+                                    <option value="vendedor" ${user.role === 'vendedor' ? 'selected' : ''}>💰 Vendedor</option>
+                                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Admin</option>
+                                </select>
+                            </td>
+                            <td><button onclick="deleteUser('${uid}')">🗑️ Eliminar</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } catch (error) {
+        showToast('Error al cargar usuarios', 'error');
     }
-    
-    container.innerHTML = `
-        <table class="users-table">
-            <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Acciones</th></tr></thead>
-            <tbody>
-                ${Object.entries(users).map(([uid, user]) => `
-                    <tr>
-                        <td>${user.name || '-'}</td>
-                        <td>${user.email}</td>
-                        <td>
-                            <select onchange="updateUserRole('${uid}', this.value)">
-                                <option value="cliente" ${user.role === 'cliente' ? 'selected' : ''}>👤 Cliente</option>
-                                <option value="asistente" ${user.role === 'asistente' ? 'selected' : ''}>🛠️ Asistente</option>
-                                <option value="vendedor" ${user.role === 'vendedor' ? 'selected' : ''}>💰 Vendedor</option>
-                                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Admin</option>
-                            </select>
-                        </td>
-                        <td><button onclick="deleteUser('${uid}')">🗑️ Eliminar</button></td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-        <button onclick="showRegisterModal()" class="btn-primary" style="margin-top: 1rem;">+ Agregar Usuario</button>
-    `;
 }
 
 async function updateUserRole(uid, newRole) {
@@ -475,43 +499,76 @@ async function deleteUser(uid) {
     }
 }
 
-// ========== PEDIDOS ==========
-async function loadOrders() {
-    const snapshot = await database.ref('orders').once('value');
-    const orders = snapshot.val();
-    const container = document.getElementById('orders-list');
-    if (!container) return;
+async function createUserByAdmin() {
+    const name = document.getElementById('user-name').value;
+    const email = document.getElementById('user-email').value;
+    const password = document.getElementById('user-password').value;
+    const role = document.getElementById('user-role').value;
     
-    if (!orders || Object.keys(orders).length === 0) {
-        container.innerHTML = '<p>No hay pedidos realizados</p>';
+    if (!email || !password) {
+        showToast('Email y contraseña son requeridos', 'error');
         return;
     }
     
-    container.innerHTML = `
-        <table class="orders-table">
-            <thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
-            <tbody>
-                ${Object.entries(orders).map(([id, order]) => `
-                    <tr>
-                        <td>${id.slice(-6)}</td>
-                        <td>${order.customerName || order.customerEmail || '-'}</td>
-                        <td>Bs ${(order.total || 0).toFixed(2)}</td>
-                        <td>
-                            <select onchange="updateOrderStatus('${id}', this.value)">
-                                <option value="pendiente" ${order.status === 'pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
-                                <option value="confirmado" ${order.status === 'confirmado' ? 'selected' : ''}>✅ Confirmado</option>
-                                <option value="enviado" ${order.status === 'enviado' ? 'selected' : ''}>📦 Enviado</option>
-                                <option value="entregado" ${order.status === 'entregado' ? 'selected' : ''}>🏠 Entregado</option>
-                                <option value="cancelado" ${order.status === 'cancelado' ? 'selected' : ''}>❌ Cancelado</option>
-                            </select>
-                        </td>
-                        <td>${new Date(order.createdAt).toLocaleDateString()}</td>
-                        <td><button onclick="viewOrderDetails('${id}')">🔍 Ver</button></td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
+    try {
+        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        await database.ref(`users/${cred.user.uid}`).set({ 
+            name: name || '', 
+            email, 
+            role, 
+            createdAt: new Date().toISOString() 
+        });
+        showToast('Usuario creado exitosamente');
+        closeUserModal();
+        loadUsers();
+    } catch (error) {
+        showToast('Error al crear usuario: ' + error.message, 'error');
+    }
+}
+
+// ========== PEDIDOS ==========
+async function loadOrders() {
+    try {
+        const snapshot = await database.ref('orders').once('value');
+        const orders = snapshot.val();
+        const container = document.getElementById('orders-list');
+        if (!container) return;
+        
+        if (!orders || Object.keys(orders).length === 0) {
+            container.innerHTML = '<p>No hay pedidos realizados</p>';
+            return;
+        }
+        
+        container.innerHTML = `
+            <table class="orders-table">
+                <thead>
+                    <tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
+                </thead>
+                <tbody>
+                    ${Object.entries(orders).map(([id, order]) => `
+                        <tr>
+                            <td>${id.slice(-6)}</td>
+                            <td>${order.customerName || order.customerEmail || '-'}</td>
+                            <td>Bs ${(order.total || 0).toFixed(2)}</td>
+                            <td>
+                                <select onchange="updateOrderStatus('${id}', this.value)">
+                                    <option value="pendiente" ${order.status === 'pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
+                                    <option value="confirmado" ${order.status === 'confirmado' ? 'selected' : ''}>✅ Confirmado</option>
+                                    <option value="enviado" ${order.status === 'enviado' ? 'selected' : ''}>📦 Enviado</option>
+                                    <option value="entregado" ${order.status === 'entregado' ? 'selected' : ''}>🏠 Entregado</option>
+                                    <option value="cancelado" ${order.status === 'cancelado' ? 'selected' : ''}>❌ Cancelado</option>
+                                </select>
+                            </td>
+                            <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                            <td><button onclick="viewOrderDetails('${id}')">🔍 Ver</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } catch (error) {
+        showToast('Error al cargar pedidos', 'error');
+    }
 }
 
 async function updateOrderStatus(orderId, newStatus) {
@@ -548,14 +605,19 @@ async function register() {
     const password = document.getElementById('register-password').value;
     const role = document.getElementById('register-role').value;
     
-    if (!name || !email || !password) {
-        showToast('Todos los campos son requeridos', 'error');
+    if (!email || !password) {
+        showToast('Email y contraseña son requeridos', 'error');
         return;
     }
     
     try {
         const cred = await auth.createUserWithEmailAndPassword(email, password);
-        await database.ref(`users/${cred.user.uid}`).set({ name, email, role, createdAt: new Date().toISOString() });
+        await database.ref(`users/${cred.user.uid}`).set({ 
+            name: name || '', 
+            email, 
+            role, 
+            createdAt: new Date().toISOString() 
+        });
         showToast('Registro exitoso');
         closeRegisterModal();
         setTimeout(() => location.reload(), 1500);
@@ -585,16 +647,16 @@ auth.onAuthStateChanged(async (user) => {
         const snap = await database.ref(`users/${user.uid}`).once('value');
         const userData = snap.val();
         currentUserRole = userData?.role || 'cliente';
-        currentUser = user;
     } else {
         currentUserRole = 'invitado';
-        currentUser = null;
     }
     updateAuthUI();
     if (currentUserRole === 'admin' || currentUserRole === 'asistente') {
         renderAdminCategories();
-        loadUsers();
-        loadOrders();
+        if (document.getElementById('admin-page').classList.contains('active')) {
+            loadUsers();
+            loadOrders();
+        }
     }
 });
 
@@ -621,10 +683,31 @@ function showAdminTab(tab) {
     if (tab === 'orders') loadOrders();
 }
 
-function showLoginModal() { document.getElementById('login-modal').style.display = 'block'; }
-function closeLoginModal() { document.getElementById('login-modal').style.display = 'none'; }
-function showRegisterModal() { closeLoginModal(); document.getElementById('register-modal').style.display = 'block'; }
-function closeRegisterModal() { document.getElementById('register-modal').style.display = 'none'; }
+function showLoginModal() { 
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.style.display = 'block';
+}
+function closeLoginModal() { 
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.style.display = 'none';
+}
+function showRegisterModal() { 
+    closeLoginModal(); 
+    const modal = document.getElementById('register-modal');
+    if (modal) modal.style.display = 'block';
+}
+function closeRegisterModal() { 
+    const modal = document.getElementById('register-modal');
+    if (modal) modal.style.display = 'none';
+}
+function showUserModal() { 
+    const modal = document.getElementById('user-modal');
+    if (modal) modal.style.display = 'block';
+}
+function closeUserModal() { 
+    const modal = document.getElementById('user-modal');
+    if (modal) modal.style.display = 'none';
+}
 function showProductModal() {
     document.getElementById('product-id').value = '';
     document.getElementById('product-name').value = '';
@@ -633,30 +716,40 @@ function showProductModal() {
     document.getElementById('product-image-url').value = '';
     clearImagePreview();
     document.getElementById('product-modal-title').innerText = '➕ Agregar Producto';
-    document.getElementById('product-modal').style.display = 'block';
+    const modal = document.getElementById('product-modal');
+    if (modal) modal.style.display = 'block';
 }
-function closeProductModal() { document.getElementById('product-modal').style.display = 'none'; }
+function closeProductModal() { 
+    const modal = document.getElementById('product-modal');
+    if (modal) modal.style.display = 'none';
+}
 function showCategoryModal() {
     document.getElementById('category-id').value = '';
     document.getElementById('category-name').value = '';
     document.getElementById('category-icon').value = '📦';
     document.getElementById('category-modal-title').innerText = '➕ Agregar Categoría';
-    document.getElementById('category-modal').style.display = 'block';
+    const modal = document.getElementById('category-modal');
+    if (modal) modal.style.display = 'block';
 }
-function closeCategoryModal() { document.getElementById('category-modal').style.display = 'none'; }
+function closeCategoryModal() { 
+    const modal = document.getElementById('category-modal');
+    if (modal) modal.style.display = 'none';
+}
 
 function changeLanguage() {
     const select = document.getElementById('language-select');
     if (select) currentLang = select.value;
-    // Simplificado: solo cambia textos básicos
-    const texts = {
-        es: { home: "Inicio", products: "Productos", cart: "Carrito" },
-        en: { home: "Home", products: "Products", cart: "Cart" }
-    };
-    if (texts[currentLang]) {
-        document.querySelector('[onclick="showPage(\'home\')"]').innerText = texts[currentLang].home;
-        document.querySelector('[onclick="showPage(\'products\')"]').innerText = texts[currentLang].products;
-        document.querySelector('[onclick="showPage(\'cart\')"]').innerHTML = texts[currentLang].cart + ' (<span id="cart-count">0</span>)';
+    const navHome = document.querySelector('[onclick="showPage(\'home\')"]');
+    const navProducts = document.querySelector('[onclick="showPage(\'products\')"]');
+    const navCart = document.querySelector('[onclick="showPage(\'cart\')"]');
+    if (currentLang === 'en') {
+        if (navHome) navHome.innerText = 'Home';
+        if (navProducts) navProducts.innerText = 'Products';
+        if (navCart) navCart.innerHTML = 'Cart (<span id="cart-count">0</span>)';
+    } else {
+        if (navHome) navHome.innerText = 'Inicio';
+        if (navProducts) navProducts.innerText = 'Productos';
+        if (navCart) navCart.innerHTML = 'Carrito (<span id="cart-count">0</span>)';
     }
 }
 
