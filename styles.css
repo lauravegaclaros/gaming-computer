@@ -530,3 +530,46 @@ footer {
     color: var(--gaming-dark);
     transform: scale(1.02);
 }
+
+/* Estilos adicionales para modales y tablas */
+.modal-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid var(--gaming-border);
+    background: var(--gaming-dark);
+    color: white;
+}
+
+.users-table select, .orders-table select {
+    background: var(--gaming-dark);
+    color: white;
+    border: 1px solid var(--gaming-accent);
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.users-table button, .orders-table button {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.category-card {
+    text-align: center;
+    padding: 1rem;
+    background: var(--gaming-card);
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--gaming-accent);
+}
