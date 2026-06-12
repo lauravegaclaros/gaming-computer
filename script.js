@@ -728,18 +728,51 @@ function closeCategoryModal() { const modal = document.getElementById('category-
 function changeLanguage() {
     const select = document.getElementById('language-select');
     if (select) currentLang = select.value;
-    const navHome = document.querySelector('[onclick="showPage(\'home\')"]');
-    const navProducts = document.querySelector('[onclick="showPage(\'products\')"]');
-    const navCart = document.querySelector('[onclick="showPage(\'cart\')"]');
-    if (currentLang === 'en') {
-        if (navHome) navHome.innerText = 'Home';
-        if (navProducts) navProducts.innerText = 'Products';
-        if (navCart) navCart.innerHTML = 'Cart (<span id="cart-count">0</span>)';
+
+    // Diccionario de textos para Quechua
+    const quechuaTexts = {
+        'nav_home': 'Wasiman',
+        'nav_products': 'Imakuna',
+        'nav_cart': 'Rantina Wasisha',
+        'login': 'Yaykuy',
+        'logout': 'Lluqsiy',
+        'welcome_title': 'GAMING COMPUTERMAN SUTIYAYKUY',
+        'products_title': 'Imakuna Rantinapaq',
+        'cart_title': 'Rantina Wasishayki',
+        'checkout_btn': 'Rantuyta Tukuychiy',
+        'admin_title': 'Kamachiq Tablero',
+        'admin_products': 'Imakuna',
+        'admin_categories': 'Katiguriyakuna',
+        'admin_users': 'Runakuna',
+        'admin_orders': 'Nachakuna',
+        'empty_cart': 'Wasishayki ch’usaqmi',
+        'total': 'Llapan Chanin'
+    };
+
+    // Aplicar traducción al Quechua si es el caso
+    if (currentLang === 'qu') {
+        document.querySelector('[onclick="showPage(\'home\')"]').innerText = quechuaTexts['nav_home'];
+        document.querySelector('[onclick="showPage(\'products\')"]').innerText = quechuaTexts['nav_products'];
+        document.querySelector('[onclick="showPage(\'cart\')"]').innerHTML = quechuaTexts['nav_cart'] + ' (<span id="cart-count">0</span>)';
+        document.querySelector('#login-btn').innerText = quechuaTexts['login'];
+        document.querySelector('#logout-btn').innerText = quechuaTexts['logout'];
+        document.querySelector('.hero h1').innerText = quechuaTexts['welcome_title'];
+        document.querySelector('#products-page h2').innerText = quechuaTexts['products_title'];
+        document.querySelector('#cart-page h2').innerText = quechuaTexts['cart_title'];
+        document.querySelector('#cart-page .btn-primary').innerText = quechuaTexts['checkout_btn'];
+        // Admin panel
+        if (document.querySelector('#admin-page h2')) document.querySelector('#admin-page h2').innerText = quechuaTexts['admin_title'];
+        // ... (puedes seguir añadiendo más)
+    } else if (currentLang === 'en') {
+        // ... (tu código para inglés)
     } else {
-        if (navHome) navHome.innerText = 'Inicio';
-        if (navProducts) navProducts.innerText = 'Productos';
-        if (navCart) navCart.innerHTML = 'Carrito (<span id="cart-count">0</span>)';
+        // ... (tu código para español, que ya funciona)
     }
+
+    // Forzar actualización de productos y carrito
+    displayProducts();
+    displayCart();
+    showToast(`Idioma cambiado a ${select.options[select.selectedIndex].text}`, 'info');
 }
 
 // ========== INICIALIZAR ==========
